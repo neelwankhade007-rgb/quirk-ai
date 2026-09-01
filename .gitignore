@@ -1,0 +1,51 @@
+# Python / FastAPI
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.Python
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pytype/
+.venv/
+venv/
+env/
+ENV/
+**/.venv/
+**/venv/
+**/env/
+**/ENV/
+*.egg-info/
+*.egg
+build/
+dist/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+
+# Local databases / data
+*.sqlite3
+*.db
+mongodb-data/
+data/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Node / frontend
+node_modules/
+.next/
+out/
+coverage/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
