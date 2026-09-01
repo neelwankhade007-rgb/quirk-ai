@@ -49,3 +49,6 @@ coverage/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Miscellaneous
+CHECKLIST.md
