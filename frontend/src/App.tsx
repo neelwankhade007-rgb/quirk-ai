@@ -1,44 +1,42 @@
-import { useEffect, useState } from "react";
-
-import CharacterForm from "./components/CharacterForm";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 import Characters from "./pages/Characters";
-import { fetchCharacters } from "./services/api";
-import type { Character } from "./types/character";
+import CreateCharacter from "./pages/CreateCharacter";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Navbar from "./components/Navbar";
 
 function App() {
-  const [characters, setCharacters] = useState<Character[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  const loadCharacters = async () => {
-    try {
-      setError("");
-
-      const data = await fetchCharacters();
-
-      setCharacters(data);
-    } catch (error) {
-      console.error(error);
-      setError("Failed to load characters");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadCharacters();
-  }, []);
-
   return (
-    <>
-      <CharacterForm onCharacterCreated={loadCharacters} />
-
-      <Characters
-        characters={characters}
-        loading={loading}
-        error={error}
-      />
-    </>
+    <BrowserRouter>
+      <div className="app-container">
+        <Navbar />
+        <main className="main-content">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route
+              path="/create-character"
+              element={
+                <ProtectedRoute>
+                  <CreateCharacter />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/characters"
+              element={
+                <ProtectedRoute>
+                  <Characters />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </main>
+      </div>
+    </BrowserRouter>
   );
 }
 

@@ -60,10 +60,16 @@ def register_user(user: UserRegister):
 
     result = db.users.insert_one(user_data)
 
+    access_token = create_access_token(str(result.inserted_id))
+
     return {
-        "id": str(result.inserted_id),
-        "username": user.username,
-        "email": user.email
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": {
+            "id": str(result.inserted_id),
+            "username": user.username,
+            "email": user.email
+        }
     }
 
 

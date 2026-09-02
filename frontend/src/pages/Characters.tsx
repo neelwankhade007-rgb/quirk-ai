@@ -1,40 +1,92 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { fetchCharacters } from "../services/api";
 import type { Character } from "../types/character";
+import CharacterCard from "../components/CharacterCard";
 
-interface CharactersProps {
-  characters: Character[];
-  loading: boolean;
-  error: string;
-}
+function Characters() {
+  const [characters, setCharacters] = useState<Character[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-function Characters({
-  characters,
-  loading,
-  error,
-}: CharactersProps) {
-  if (loading) {
-    return <p>Loading characters...</p>;
-  }
+  useEffect(() => {
+    let isMounted = true;
 
-  if (error) {
-    return <p>{error}</p>;
-  }
+    async function loadCharacters() {
+      try {
+        setError("");
+        const data = await fetchCharacters();
+        if (isMounted) {
+          setCharacters(data);
+        }
+      } catch (err) {
+        console.error(err);
+        if (isMounted) {
+          setError("Failed to load characters from server");
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadCharacters();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
-    <main>
-      <h1>Characters</h1>
+    <div>
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Characters</h1>
+          <p className="card-subtitle">Explore and chat with created AI personas</p>
+        </div>
+        <Link
+          to="/create-character"
+          className="btn-primary"
+          style={{ textDecoration: "none", width: "auto", padding: "0.6rem 1.2rem", marginTop: 0 }}
+        >
+          + Create Character
+        </Link>
+      </div>
 
-      {characters.length === 0 ? (
-        <p>No characters yet.</p>
-      ) : (
-        characters.map((character) => (
-          <article key={character.id}>
-            <h2>{character.name}</h2>
-            <p>{character.description}</p>
-            <p>{character.personality}</p>
-          </article>
-        ))
+      {loading && (
+        <div style={{ textAlign: "center", padding: "3rem", color: "var(--text-muted)" }}>
+          Loading characters...
+        </div>
       )}
-    </main>
+
+      {error && (
+        <div className="alert alert-error">
+          <span>⚠️</span> {error}
+        </div>
+      )}
+
+      {!loading && !error && characters.length === 0 && (
+        <div className="empty-state">
+          <p>No characters created yet.</p>
+          <Link
+            to="/create-character"
+            className="btn-primary"
+            style={{ textDecoration: "none", display: "inline-block", width: "auto", padding: "0.65rem 1.5rem" }}
+          >
+            Create Your First Character
+          </Link>
+        </div>
+      )}
+
+      {!loading && !error && characters.length > 0 && (
+        <div className="character-grid">
+          {characters.map((character) => (
+            <CharacterCard key={character.id} character={character} />
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
