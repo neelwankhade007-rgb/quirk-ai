@@ -1,11 +1,12 @@
 from fastapi import FastAPI
-from bson import ObjectId
 from fastapi.middleware.cors import CORSMiddleware
 
 
 from app.db.mongodb import client
+
 from app.api.character import router as character_router
 from app.api.auth import router as auth_router
+from app.api.conversations import router as conversations_router
 
 app = FastAPI(
     title="Quirk AI API",
@@ -22,7 +23,7 @@ app.add_middleware(
 
 app.include_router(character_router)
 app.include_router(auth_router)
-
+app.include_router(conversations_router)
 
 @app.get("/")
 def root():

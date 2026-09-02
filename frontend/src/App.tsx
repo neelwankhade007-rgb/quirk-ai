@@ -7,6 +7,7 @@ import CreateCharacter from "./pages/CreateCharacter";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Navbar from "./components/Navbar";
 import CharacterProfile from "./pages/CharacterProfile";
+import Chat from "./pages/Chat";
 
 function App() {
   return (
@@ -39,6 +40,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <CharacterProfile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/characters/:characterId/chat"
+              element={
+                <ProtectedRoute>
+                  <Chat />
                 </ProtectedRoute>
               }
             />

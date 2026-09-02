@@ -114,3 +114,95 @@ export async function loginUser(user: LoginData) {
 
   return response.json();
 }
+
+export async function createConversation(
+  characterId: string
+): Promise<{ id: string; message: string }> {
+  const token = localStorage.getItem("access_token");
+
+  const response = await fetch(`${API_URL}/conversations/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ character_id: characterId }),
+  });
+
+  if (!response.ok) {
+    const errorMessage = await parseApiError(response, "Failed to create conversation");
+    throw new Error(errorMessage);
+  }
+
+  return response.json();
+}
+
+
+export async function sendMessage(
+  characterId: string,
+  content: string
+) {
+  const token = localStorage.getItem("access_token");
+
+  const response = await fetch(`${API_URL}/conversations/messages`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      character_id: characterId,
+      content,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to send message");
+  }
+
+  return response.json();
+}
+
+
+export async function getConversation(characterId: string) {
+  const token = localStorage.getItem("access_token");
+
+  const response = await fetch(
+    `${API_URL}/conversations/character/${characterId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (response.status === 404) {
+    return null;
+  }
+
+  if (!response.ok) {
+    throw new Error("Failed to load conversation");
+  }
+
+  return response.json();
+}
+
+
+export async function getMessages(conversationId: string) {
+  const token = localStorage.getItem("access_token");
+
+  const response = await fetch(
+    `${API_URL}/conversations/${conversationId}/messages`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to load messages");
+  }
+
+  return response.json();
+}

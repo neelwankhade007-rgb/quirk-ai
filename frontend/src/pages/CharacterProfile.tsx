@@ -98,9 +98,18 @@ function CharacterProfile() {
           </div>
         )}
 
-        <button className="btn-primary" style={{ marginTop: "1rem" }}>
+        <Link
+          to={`/characters/${character.id}/chat`}
+          className="btn-primary"
+          style={{
+            marginTop: "1rem",
+            display: "inline-block",
+            textAlign: "center",
+            textDecoration: "none",
+          }}
+        >
           Start Chat
-        </button>
+        </Link>
       </div>
     </div>
   );
