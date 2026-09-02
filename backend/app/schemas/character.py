@@ -6,3 +6,13 @@ class CharacterCreate(BaseModel):
     personality: str = Field(..., min_length=1, max_length=2000)  # How the character behaves
     greeting: str = Field(..., min_length=1, max_length=1000)  # First message when the user starts chatting
     backstory: str = Field(..., min_length=1, max_length=5000)  # character history/context
+
+
+class CharacterResponse(BaseModel):
+    id: str
+    name: str
+    description: str
+    personality: str
+    greeting: str
+    backstory: str
+    created_by: str  # User ID of the creator

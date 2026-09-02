@@ -11,3 +11,9 @@ DATABASE_NAME = "quirkai_db"
 client = MongoClient(MONGODB_URI)
 
 db = client[DATABASE_NAME]
+
+try:
+    client.admin.command("ping")
+    print(f"✓ MongoDB connected successfully | Database: {DATABASE_NAME}")
+except Exception as error:
+    print(f"✗ MongoDB connection failed: {error}")

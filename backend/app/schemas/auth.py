@@ -7,6 +7,10 @@ class UserRegister(BaseModel):
     password: str = Field(..., min_length=8, max_length=100)
 
 
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
 class UserResponse(BaseModel):
     id: str
     username: str
