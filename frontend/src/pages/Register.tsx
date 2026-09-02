@@ -53,7 +53,7 @@ function Register() {
 
         {error && (
           <div className="alert alert-error">
-            <span>⚠️</span> {error}
+            {error}
           </div>
         )}
 

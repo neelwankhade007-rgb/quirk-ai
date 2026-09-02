@@ -16,6 +16,17 @@ export async function fetchCharacters(): Promise<Character[]> {
 }
 
 
+export async function fetchCharacterById(id: string): Promise<Character> {
+  const response = await fetch(`${API_URL}/characters/${id}`);
+
+  if (!response.ok) {
+    throw new Error("Character not found");
+  }
+
+  return response.json();
+}
+
+
 export async function createCharacter(
   character: Omit<Character, "id">
 ): Promise<{ id: string; message: string }> {

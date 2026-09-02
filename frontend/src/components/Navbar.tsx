@@ -14,7 +14,7 @@ function Navbar() {
     <nav className="navbar">
       <div className="navbar-inner">
         <Link to="/" className="brand">
-          ⚡ <span>QuirkAI</span>
+          <span>QuirkAI</span>
         </Link>
 
         <div className="nav-links">

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import type { Character } from "../types/character";
 
 interface CharacterCardProps {
@@ -6,24 +7,22 @@ interface CharacterCardProps {
 
 function CharacterCard({ character }: CharacterCardProps) {
   return (
-    <article className="character-card">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <h2 className="character-name">{character.name}</h2>
-      </div>
+    <Link
+      to={`/characters/${character.id}`}
+      style={{ textDecoration: "none", color: "inherit", display: "block" }}
+    >
+      <article className="character-card">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+          <h2 className="character-name">{character.name}</h2>
+        </div>
 
-      {character.personality && (
-        <span className="character-tag">{character.personality}</span>
-      )}
-
-      {character.description && (
-        <p className="character-desc">{character.description}</p>
-      )}
-
-      {character.greeting && (
-        <p className="character-greeting">"{character.greeting}"</p>
-      )}
-    </article>
+        {character.description && (
+          <p className="character-desc">{character.description}</p>
+        )}
+      </article>
+    </Link>
   );
 }
 
 export default CharacterCard;
+

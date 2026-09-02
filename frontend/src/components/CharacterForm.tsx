@@ -65,13 +65,13 @@ function CharacterForm({ onCharacterCreated }: CharacterFormProps) {
 
         {error && (
           <div className="alert alert-error">
-            <span>⚠️</span> {error}
+            {error}
           </div>
         )}
 
         {success && (
           <div className="alert alert-success">
-            <span>✓</span> Character created successfully! Redirecting...
+            Character created successfully! Redirecting...
           </div>
         )}
 
