@@ -1,14 +1,12 @@
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
-
 import {
   fetchCharacterById,
   sendMessage,
   getConversation,
   getMessages,
-  createConversation,
 } from "../services/api";
-
+import MessageContent from "../components/MessageContext";
 import type { Character } from "../types/character";
 
 interface Message {
@@ -28,11 +26,13 @@ function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // Load character and conversation history
   useEffect(() => {
     if (!characterId) return;
 
+    const id = characterId;
     let isMounted = true;
 
     async function loadChat() {
@@ -40,27 +40,19 @@ function Chat() {
         setLoading(true);
 
         // Load character
-        const characterData = await fetchCharacterById(characterId);
+        const characterData = await fetchCharacterById(id);
 
         if (!isMounted) return;
 
         setCharacter(characterData);
 
-        // Check whether conversation already exists, or create one to initialize greeting in DB
-        let conversation = await getConversation(characterId);
-        if (!conversation) {
-          try {
-            await createConversation(characterId);
-            conversation = await getConversation(characterId);
-          } catch (e) {
-            console.warn("Could not auto-create conversation:", e);
-          }
-        }
+        // Check whether conversation already exists
+        const conversation = await getConversation(id);
 
         if (!isMounted) return;
 
         if (conversation) {
-          // Conversation exists → load saved messages (which contains greeting + any user messages)
+          // Conversation exists → load saved messages
           const history = await getMessages(conversation.id);
 
           if (!isMounted) return;
@@ -81,7 +73,7 @@ function Chat() {
 
           setMessages(formattedMessages);
         } else {
-          // Fallback if not logged in or backend conversation creation fails
+          // No conversation yet → only show greeting locally
           if (characterData.greeting) {
             setMessages([
               {
@@ -114,12 +106,34 @@ function Chat() {
     };
   }, [characterId]);
 
-  // Scroll to latest message
+  // Scroll to latest message or typing indicator
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
       behavior: "smooth",
     });
-  }, [messages]);
+  }, [messages, sending]);
+
+  // Add action formatting
+  const handleActionFormat = () => {
+    const input = inputRef.current;
+
+    if (!(input instanceof HTMLTextAreaElement)) return;
+
+    const start = input.selectionStart ?? inputValue.length;
+    const end = input.selectionEnd ?? inputValue.length;
+
+    const newValue =
+      inputValue.slice(0, start) +
+      "****" +
+      inputValue.slice(end);
+
+    setInputValue(newValue);
+
+    requestAnimationFrame(() => {
+      input.focus();
+      input.setSelectionRange(start + 2, start + 2);
+    });
+  };
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -145,7 +159,13 @@ function Chat() {
       // Backend creates the conversation if this is the first message
       const data = await sendMessage(characterId, trimmed);
 
-      console.log("Message sent:", data);
+      const characterMsg: Message = {
+        id: data.ai_message_id,
+        sender: "character",
+        text: data.ai_response,
+      };
+
+      setMessages((prev) => [...prev, characterMsg]);
     } catch (error) {
       console.error("Failed to send message:", error);
 
@@ -166,19 +186,22 @@ function Chat() {
 
   if (loading) {
     return (
-      <div
-        style={{
-          textAlign: "center",
-          padding: "3rem",
-          color: "var(--text-muted)",
-        }}
-      >
-        Loading chat...
+      <div className="chat-page">
+        <div
+          style={{
+            textAlign: "center",
+            padding: "3rem",
+            color: "var(--text-muted)",
+          }}
+        >
+          Loading chat...
+        </div>
       </div>
     );
   }
 
   return (
+    <div className="chat-page">
     <div className="chat-container">
       {/* Top Header */}
       <header className="chat-header">
@@ -221,7 +244,9 @@ function Chat() {
           )}
 
           {character?.description && (
-            <p className="chat-intro-greeting">"{character.description}"</p>
+            <p className="chat-intro-greeting">
+              "{character.description}"
+            </p>
           )}
         </div>
 
@@ -229,42 +254,82 @@ function Chat() {
         {messages.map((msg) => (
           <div
             key={msg.id}
-            className={`chat-message-row ${
-              msg.sender === "user" ? "user" : "character"
-            }`}
+            className={`chat-message-row ${msg.sender === "user" ? "user" : "character"
+              }`}
           >
             <div
-              className={`chat-bubble ${
-                msg.sender === "user" ? "user" : "character"
-              }`}
+              className={`chat-bubble ${msg.sender === "user" ? "user" : "character"
+                }`}
             >
-              {msg.text}
+              <MessageContent text={msg.text} />
             </div>
           </div>
         ))}
+
+        {/* Typing Indicator */}
+        {sending && (
+          <div className="chat-message-row character">
+            <div className="chat-bubble character chat-typing-indicator">
+              <div className="chat-typing-label">
+                {characterName} is typing...
+              </div>
+
+              <div className="chat-typing-dots">
+                <span className="chat-typing-dot" />
+                <span className="chat-typing-dot" />
+                <span className="chat-typing-dot" />
+              </div>
+            </div>
+          </div>
+        )}
 
         <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
       <form onSubmit={handleSendMessage} className="chat-input-bar">
-        <input
-          type="text"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          placeholder="Type a message..."
-          autoFocus
-          disabled={sending}
-        />
+        <div className="chat-composer">
+          <textarea
+            ref={inputRef}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
 
-        <button
-          type="submit"
-          className="chat-send-btn"
-          disabled={!inputValue.trim() || sending}
-        >
-          {sending ? "Sending..." : "Send"}
-        </button>
+                if (!sending && inputValue.trim()) {
+                  e.currentTarget.form?.requestSubmit();
+                }
+              }
+            }}
+            placeholder="Type a message..."
+            autoFocus
+            disabled={sending}
+            rows={1}
+          />
+
+          <div className="chat-composer-actions">
+            <button
+              type="button"
+              className="chat-format-btn"
+              onClick={handleActionFormat}
+              disabled={sending}
+              title="Add action formatting"
+            >
+              **
+            </button>
+
+            <button
+              type="submit"
+              className="chat-send-btn"
+              disabled={!inputValue.trim() || sending}
+            >
+              {sending ? "..." : "→"}
+            </button>
+          </div>
+        </div>
       </form>
+    </div>
     </div>
   );
 }
