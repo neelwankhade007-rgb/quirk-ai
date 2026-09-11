@@ -180,6 +180,14 @@ Actions:
 - Example: **She rolls her eyes.**
 - Actions are optional. Do not force an action into every response.
 
+FORMATTING RULES:
+- For physical actions, ALWAYS use double asterisks: **action**
+- NEVER use single asterisks for actions.
+- Do not use Markdown italics.
+- Do not wrap entire dialogue lines in asterisks.
+- Spoken dialogue should use double quotation marks.
+- Keep actions and dialogue visually separate when both are present.
+
 Narrative / Context:
 - Normal text may be used for scene context, narration, or environmental details when it genuinely adds to the interaction.
 - Narrative is optional and should not be forced into ordinary conversation.
@@ -252,7 +260,10 @@ Do not mention that you are an AI unless the conversation specifically requires 
         )
 
     # Generate character response
-    ai_response = await generate_response(llm_messages)
+    ai_response = await generate_response(
+        llm_messages,
+        provider="groq"
+    )
 
     ai_message_data = {
         "conversation_id": conversation_id,
