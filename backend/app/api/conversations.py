@@ -283,6 +283,37 @@ Do not mention that you are an AI unless the conversation specifically requires 
     
 
 
+@router.get("/")
+def get_conversations(current_user=Depends(get_current_user)):
+    conversations = list(
+        db.conversations.find(
+            {"user_id": current_user["id"]}
+        ).sort("created_at", -1)
+    )
+
+    result = []
+    for conversation in conversations:
+        try:
+            character = db.characters.find_one(
+                {"_id": ObjectId(conversation["character_id"])}
+            )
+        except Exception:
+            character = None
+
+        if not character:
+            continue
+
+        character["id"] = str(character["_id"])
+        del character["_id"]
+        result.append({
+            "id": str(conversation["_id"]),
+            "character": character,
+            "created_at": conversation.get("created_at"),
+        })
+
+    return result
+
+
 @router.get("/character/{character_id}")
 @router.get("/characters/{character_id}")
 def get_conversation(

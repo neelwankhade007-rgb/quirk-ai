@@ -2,6 +2,12 @@ import type { Character } from "../types/character";
 
 const API_URL = "http://127.0.0.1:8000";
 
+export interface ConversationSummary {
+  id: string;
+  character: Character;
+  created_at?: string;
+}
+
 
 export async function fetchCharacters(): Promise<Character[]> {
   const response = await fetch(`${API_URL}/characters/`);
@@ -132,6 +138,22 @@ export async function createConversation(
   if (!response.ok) {
     const errorMessage = await parseApiError(response, "Failed to create conversation");
     throw new Error(errorMessage);
+  }
+
+  return response.json();
+}
+
+export async function fetchConversations(): Promise<ConversationSummary[]> {
+  const token = localStorage.getItem("access_token");
+
+  const response = await fetch(`${API_URL}/conversations/`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to load conversations");
   }
 
   return response.json();

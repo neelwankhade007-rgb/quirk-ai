@@ -14,6 +14,7 @@ function Navbar() {
     <nav className="navbar">
       <div className="navbar-inner">
         <Link to="/" className="brand">
+          <img src="/quirk_ai_logo.png" alt="" className="brand-logo" />
           <span>QuirkAI</span>
         </Link>
 
@@ -25,6 +26,12 @@ function Navbar() {
                 className={`nav-link ${location.pathname === "/characters" ? "active" : ""}`}
               >
                 Characters
+              </Link>
+              <Link
+                to="/chats"
+                className={`nav-link ${location.pathname === "/chats" ? "active" : ""}`}
+              >
+                Chats
               </Link>
               <Link
                 to="/create-character"
