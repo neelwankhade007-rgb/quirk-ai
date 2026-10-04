@@ -1,17 +1,22 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createCharacter } from "../services/api";
+import { createCharacter, updateCharacter } from "../services/api";
+import AvatarPicker from "./AvatarPicker";
+import type { Character } from "../types/character";
 
 interface CharacterFormProps {
+  initialData?: Character;
   onCharacterCreated?: () => void;
 }
 
-function CharacterForm({ onCharacterCreated }: CharacterFormProps) {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [personality, setPersonality] = useState("");
-  const [greeting, setGreeting] = useState("");
-  const [backstory, setBackstory] = useState("");
+function CharacterForm({ initialData, onCharacterCreated }: CharacterFormProps) {
+  const [name, setName] = useState(initialData?.name || "");
+  const [description, setDescription] = useState(initialData?.description || "");
+  const [personality, setPersonality] = useState(initialData?.personality || "");
+  const [greeting, setGreeting] = useState(initialData?.greeting || "");
+  const [backstory, setBackstory] = useState(initialData?.backstory || "");
+  const [imageUrl, setImageUrl] = useState(initialData?.image_url || "");
+  const [avatarType, setAvatarType] = useState<"custom" | "default" | undefined>(initialData?.avatar_type);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -24,13 +29,21 @@ function CharacterForm({ onCharacterCreated }: CharacterFormProps) {
     setLoading(true);
 
     try {
-      await createCharacter({
+      const characterData = {
         name,
         description,
         personality,
         greeting,
         backstory,
-      });
+        image_url: imageUrl || undefined,
+        avatar_type: avatarType,
+      };
+
+      if (initialData) {
+        await updateCharacter(initialData.id, characterData);
+      } else {
+        await createCharacter(characterData);
+      }
 
       setSuccess(true);
       if (onCharacterCreated) {
@@ -42,6 +55,8 @@ function CharacterForm({ onCharacterCreated }: CharacterFormProps) {
       setPersonality("");
       setGreeting("");
       setBackstory("");
+      setImageUrl("");
+      setAvatarType(undefined);
 
       setTimeout(() => {
         navigate("/characters");
@@ -59,7 +74,7 @@ function CharacterForm({ onCharacterCreated }: CharacterFormProps) {
     <div style={{ maxWidth: "600px", margin: "0 auto" }}>
       <div className="card">
         <div className="card-header" style={{ textAlign: "left", marginBottom: "1.5rem" }}>
-          <h1 className="card-title">Create AI Character</h1>
+          <h1 className="card-title">{initialData ? "Edit AI Character" : "Create AI Character"}</h1>
           <p className="card-subtitle">Define the persona, style, and greeting of your character</p>
         </div>
 
@@ -71,7 +86,7 @@ function CharacterForm({ onCharacterCreated }: CharacterFormProps) {
 
         {success && (
           <div className="alert alert-success">
-            Character created successfully! Redirecting...
+            {initialData ? "Character updated successfully!" : "Character created successfully!"} Redirecting...
           </div>
         )}
 
@@ -97,6 +112,16 @@ function CharacterForm({ onCharacterCreated }: CharacterFormProps) {
               required
             />
           </div>
+
+          <AvatarPicker 
+            name={name}
+            avatarType={avatarType}
+            imageUrl={imageUrl}
+            onChange={(type, url) => {
+              setAvatarType(type);
+              setImageUrl(url);
+            }}
+          />
 
           <div className="form-group">
             <label className="form-label">Personality & Traits</label>
@@ -129,7 +154,7 @@ function CharacterForm({ onCharacterCreated }: CharacterFormProps) {
           </div>
 
           <button type="submit" className="btn-primary" disabled={loading}>
-            {loading ? "Creating Character..." : "Create Character"}
+            {loading ? (initialData ? "Updating..." : "Creating...") : (initialData ? "Save Changes" : "Create Character")}
           </button>
         </form>
       </div>

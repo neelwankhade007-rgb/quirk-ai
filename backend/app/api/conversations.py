@@ -262,7 +262,7 @@ Do not mention that you are an AI unless the conversation specifically requires 
     # Generate character response
     ai_response = await generate_response(
         llm_messages,
-        provider="groq"
+        provider="xkiro"
     )
 
     ai_message_data = {

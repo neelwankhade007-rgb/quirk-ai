@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { fetchCharacterById } from "../services/api";
 import type { Character } from "../types/character";
+import CharacterAvatar from "../components/CharacterAvatar";
 
 function CharacterProfile() {
   const { characterId } = useParams<{ characterId: string }>();
@@ -70,13 +71,16 @@ function CharacterProfile() {
       </Link>
 
       <div className="card" style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-        <div className="card-header" style={{ textAlign: "left", marginBottom: 0 }}>
-          <h1 className="card-title">{character.name}</h1>
+        <div className="card-header" style={{ textAlign: "left", marginBottom: 0, display: "flex", alignItems: "center", gap: "20px" }}>
+          <CharacterAvatar name={character.name} imageUrl={character.image_url} size={80} />
+          <div>
+            <h1 className="card-title">{character.name}</h1>
           {character.personality && (
             <span className="character-tag" style={{ marginTop: "0.5rem" }}>
               {character.personality}
             </span>
           )}
+          </div>
         </div>
 
         {character.description && (
@@ -98,18 +102,31 @@ function CharacterProfile() {
           </div>
         )}
 
-        <Link
-          to={`/characters/${character.id}/chat`}
-          className="btn-primary"
-          style={{
-            marginTop: "1rem",
-            display: "inline-block",
-            textAlign: "center",
-            textDecoration: "none",
-          }}
-        >
-          Start Chat
-        </Link>
+        <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
+          <Link
+            to={`/characters/${character.id}/chat`}
+            className="btn-primary"
+            style={{
+              flex: 1,
+              textAlign: "center",
+              textDecoration: "none",
+            }}
+          >
+            Start Chat
+          </Link>
+          
+          <Link
+            to={`/characters/${character.id}/edit`}
+            className="btn-secondary"
+            style={{
+              flex: 1,
+              textAlign: "center",
+              textDecoration: "none",
+            }}
+          >
+            Edit Character
+          </Link>
+        </div>
       </div>
     </div>
   );

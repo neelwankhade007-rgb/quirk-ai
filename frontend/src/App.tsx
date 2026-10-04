@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Characters from "./pages/Characters";
 import CreateCharacter from "./pages/CreateCharacter";
+import EditCharacter from "./pages/EditCharacter";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Navbar from "./components/Navbar";
 import CharacterProfile from "./pages/CharacterProfile";
@@ -33,6 +34,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Characters />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/characters/:characterId/edit"
+              element={
+                <ProtectedRoute>
+                  <EditCharacter />
                 </ProtectedRoute>
               }
             />

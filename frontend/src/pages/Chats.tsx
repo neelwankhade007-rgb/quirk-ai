@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { fetchConversations } from "../services/api";
 import type { ConversationSummary } from "../services/api";
+import CharacterAvatar from "../components/CharacterAvatar";
 
 function Chats() {
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
@@ -75,8 +76,8 @@ function Chats() {
               to={`/characters/${character.id}/chat`}
               className="chat-list-card"
             >
-              <div className="chat-list-avatar">
-                {character.name.charAt(0).toUpperCase()}
+              <div className="chat-list-avatar" style={{ backgroundColor: 'transparent' }}>
+                <CharacterAvatar name={character.name} imageUrl={character.image_url} size={48} />
               </div>
               <div>
                 <h2 className="character-name">{character.name}</h2>

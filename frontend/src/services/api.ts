@@ -1,6 +1,6 @@
 import type { Character } from "../types/character";
 
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = `http://${window.location.hostname}:8000`;
 
 export interface ConversationSummary {
   id: string;
@@ -224,6 +224,49 @@ export async function getMessages(conversationId: string) {
 
   if (!response.ok) {
     throw new Error("Failed to load messages");
+  }
+
+  return response.json();
+}
+
+export async function uploadImage(file: File): Promise<{ image_url: string }> {
+  const token = localStorage.getItem("access_token");
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch(`${API_URL}/characters/upload-image`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errorMessage = await parseApiError(response, "Failed to upload image");
+    throw new Error(errorMessage);
+  }
+
+  return response.json();
+}
+
+export async function updateCharacter(
+  id: string,
+  character: Omit<Character, "id" | "created_by">
+): Promise<{ message: string }> {
+  const token = localStorage.getItem("access_token");
+
+  const response = await fetch(`${API_URL}/characters/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(character),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update character");
   }
 
   return response.json();

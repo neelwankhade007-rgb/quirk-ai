@@ -7,6 +7,7 @@ import {
   getMessages,
 } from "../services/api";
 import MessageContent from "../components/MessageContext";
+import CharacterAvatar from "../components/CharacterAvatar";
 import type { Character } from "../types/character";
 
 interface Message {
@@ -231,8 +232,8 @@ function Chat() {
       <div className="chat-messages-area">
         {/* Character Intro */}
         <div className="chat-intro-card">
-          <div className="chat-intro-avatar">
-            {characterName.charAt(0).toUpperCase()}
+          <div className="chat-intro-avatar" style={{ display: "flex", justifyContent: "center", marginBottom: "16px", backgroundColor: "transparent" }}>
+            <CharacterAvatar name={characterName} imageUrl={character?.image_url} size={80} />
           </div>
 
           <h2 className="chat-intro-name">{characterName}</h2>
