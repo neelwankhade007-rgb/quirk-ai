@@ -45,6 +45,7 @@ uploads/
 .DS_Store
 Thumbs.db
 .claude/
+.kilo/
 
 # Node / frontend / mobile
 node_modules/
