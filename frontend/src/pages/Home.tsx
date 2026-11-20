@@ -1,12 +1,16 @@
 import { Link } from "react-router-dom";
+import { Sparkles, Zap, Shield, ArrowRight } from "lucide-react";
 
 function Home() {
   const token = localStorage.getItem("access_token");
 
   return (
-    <div className="home-container">
+    <div className="home-container fade-in">
       <div className="home-hero">
-        <div className="home-badge">AI-Powered Persona Sandbox</div>
+        <div className="home-badge">
+          <Sparkles size={16} />
+          <span>AI-Powered Persona Sandbox</span>
+        </div>
         <h1 className="home-title">
           Create, Customize & Chat with <span className="text-gradient">AI Characters</span>
         </h1>
@@ -17,7 +21,7 @@ function Home() {
         <div className="home-actions">
           {token ? (
             <Link to="/characters" className="btn-primary home-btn">
-              Go to Characters →
+              Go to Characters <ArrowRight size={18} />
             </Link>
           ) : (
             <>
@@ -34,14 +38,23 @@ function Home() {
 
       <div className="home-features">
         <div className="feature-card">
+          <div className="feature-icon">
+            <Sparkles size={20} />
+          </div>
           <h3>Unique Personas</h3>
           <p>Design characters with specific quirks, archetypes, and tone adjustments.</p>
         </div>
         <div className="feature-card">
+          <div className="feature-icon">
+            <Zap size={20} />
+          </div>
           <h3>Instant Creation</h3>
           <p>Easily define prompt parameters and jump straight into conversations.</p>
         </div>
         <div className="feature-card">
+          <div className="feature-icon">
+            <Shield size={20} />
+          </div>
           <h3>Secure & Personal</h3>
           <p>Your characters and prompts are safely stored and tied to your account.</p>
         </div>

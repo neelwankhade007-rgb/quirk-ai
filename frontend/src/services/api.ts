@@ -1,6 +1,27 @@
 import type { Character } from "../types/character";
+import { ACCESS_TOKEN_KEY, AUTH_EXPIRED_EVENT } from "../utils/auth";
 
 const API_URL = `http://${window.location.hostname}:8000`;
+
+async function authenticatedFetch(
+  input: RequestInfo | URL,
+  init: RequestInit
+): Promise<Response> {
+  const requestToken = new Headers(init.headers)
+    .get("Authorization")
+    ?.replace(/^Bearer\s+/i, "");
+  const response = await fetch(input, init);
+
+  if (
+    response.status === 401 &&
+    requestToken &&
+    localStorage.getItem(ACCESS_TOKEN_KEY) === requestToken
+  ) {
+    window.dispatchEvent(new Event(AUTH_EXPIRED_EVENT));
+  }
+
+  return response;
+}
 
 export interface ConversationSummary {
   id: string;
@@ -10,7 +31,12 @@ export interface ConversationSummary {
 
 
 export async function fetchCharacters(): Promise<Character[]> {
-  const response = await fetch(`${API_URL}/characters/`);
+  const token = localStorage.getItem(ACCESS_TOKEN_KEY);
+  const response = await authenticatedFetch(`${API_URL}/characters/me`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
   if (!response.ok) {
     throw new Error(
@@ -36,9 +62,9 @@ export async function fetchCharacterById(id: string): Promise<Character> {
 export async function createCharacter(
   character: Omit<Character, "id">
 ): Promise<{ id: string; message: string }> {
-  const token = localStorage.getItem("access_token");
+  const token = localStorage.getItem(ACCESS_TOKEN_KEY);
 
-  const response = await fetch(`${API_URL}/characters/`, {
+  const response = await authenticatedFetch(`${API_URL}/characters/`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -124,9 +150,9 @@ export async function loginUser(user: LoginData) {
 export async function createConversation(
   characterId: string
 ): Promise<{ id: string; message: string }> {
-  const token = localStorage.getItem("access_token");
+  const token = localStorage.getItem(ACCESS_TOKEN_KEY);
 
-  const response = await fetch(`${API_URL}/conversations/`, {
+  const response = await authenticatedFetch(`${API_URL}/conversations/`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -144,9 +170,9 @@ export async function createConversation(
 }
 
 export async function fetchConversations(): Promise<ConversationSummary[]> {
-  const token = localStorage.getItem("access_token");
+  const token = localStorage.getItem(ACCESS_TOKEN_KEY);
 
-  const response = await fetch(`${API_URL}/conversations/`, {
+  const response = await authenticatedFetch(`${API_URL}/conversations/`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -164,9 +190,9 @@ export async function sendMessage(
   characterId: string,
   content: string
 ) {
-  const token = localStorage.getItem("access_token");
+  const token = localStorage.getItem(ACCESS_TOKEN_KEY);
 
-  const response = await fetch(`${API_URL}/conversations/messages`, {
+  const response = await authenticatedFetch(`${API_URL}/conversations/messages`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -187,9 +213,9 @@ export async function sendMessage(
 
 
 export async function getConversation(characterId: string) {
-  const token = localStorage.getItem("access_token");
+  const token = localStorage.getItem(ACCESS_TOKEN_KEY);
 
-  const response = await fetch(
+  const response = await authenticatedFetch(
     `${API_URL}/conversations/character/${characterId}`,
     {
       headers: {
@@ -211,9 +237,9 @@ export async function getConversation(characterId: string) {
 
 
 export async function getMessages(conversationId: string) {
-  const token = localStorage.getItem("access_token");
+  const token = localStorage.getItem(ACCESS_TOKEN_KEY);
 
-  const response = await fetch(
+  const response = await authenticatedFetch(
     `${API_URL}/conversations/${conversationId}/messages`,
     {
       headers: {
@@ -230,11 +256,11 @@ export async function getMessages(conversationId: string) {
 }
 
 export async function uploadImage(file: File): Promise<{ image_url: string }> {
-  const token = localStorage.getItem("access_token");
+  const token = localStorage.getItem(ACCESS_TOKEN_KEY);
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await fetch(`${API_URL}/characters/upload-image`, {
+  const response = await authenticatedFetch(`${API_URL}/characters/upload-image`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -254,9 +280,9 @@ export async function updateCharacter(
   id: string,
   character: Omit<Character, "id" | "created_by">
 ): Promise<{ message: string }> {
-  const token = localStorage.getItem("access_token");
+  const token = localStorage.getItem(ACCESS_TOKEN_KEY);
 
-  const response = await fetch(`${API_URL}/characters/${id}`, {
+  const response = await authenticatedFetch(`${API_URL}/characters/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

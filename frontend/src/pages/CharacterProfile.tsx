@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { fetchCharacterById } from "../services/api";
 import type { Character } from "../types/character";
 import CharacterAvatar from "../components/CharacterAvatar";
+import { MessageSquare, Settings, ArrowLeft } from "lucide-react";
 
 function CharacterProfile() {
   const { characterId } = useParams<{ characterId: string }>();
@@ -43,89 +44,90 @@ function CharacterProfile() {
 
   if (loading) {
     return (
-      <div style={{ textAlign: "center", padding: "3rem", color: "var(--text-muted)" }}>
-        Loading character...
+      <div className="loading-state">
+        <div className="loading-spinner"></div>
+        <p className="loading-text">Loading character profile...</p>
       </div>
     );
   }
 
   if (error || !character) {
     return (
-      <div>
+      <div className="profile-page fade-in">
         <div className="alert alert-error">{error || "Character not found"}</div>
-        <Link to="/characters" className="nav-link" style={{ display: "inline-block" }}>
-          &larr; Back to Characters
+        <Link to="/characters" className="profile-back">
+          <ArrowLeft size={16} /> Back to Characters
         </Link>
       </div>
     );
   }
 
   return (
-    <div style={{ maxWidth: "700px", margin: "0 auto" }}>
-      <Link
-        to="/characters"
-        className="nav-link"
-        style={{ display: "inline-block", marginBottom: "1.5rem" }}
-      >
-        &larr; Back to Characters
+    <div className="profile-page fade-in">
+      <Link to="/characters" className="profile-back">
+        <ArrowLeft size={16} /> Back to Characters
       </Link>
 
-      <div className="card" style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-        <div className="card-header" style={{ textAlign: "left", marginBottom: 0, display: "flex", alignItems: "center", gap: "20px" }}>
-          <CharacterAvatar name={character.name} imageUrl={character.image_url} size={80} />
-          <div>
-            <h1 className="card-title">{character.name}</h1>
-          {character.personality && (
-            <span className="character-tag" style={{ marginTop: "0.5rem" }}>
-              {character.personality}
-            </span>
-          )}
-          </div>
+      <div className="profile-hero">
+        <div className="profile-avatar-wrapper">
+          <CharacterAvatar 
+            name={character.name} 
+            imageUrl={character.image_url} 
+            size={120} 
+          />
         </div>
-
-        {character.description && (
-          <div>
-            <label className="form-label">Description</label>
-            <p className="character-desc" style={{ marginTop: "0.25rem" }}>
-              {character.description}
-            </p>
-          </div>
-        )}
-
-
-        {character.backstory && (
-          <div>
-            <label className="form-label">Backstory</label>
-            <p className="character-desc" style={{ marginTop: "0.25rem" }}>
-              {character.backstory}
-            </p>
-          </div>
-        )}
-
-        <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
-          <Link
-            to={`/characters/${character.id}/chat`}
-            className="btn-primary"
-            style={{
-              flex: 1,
-              textAlign: "center",
-              textDecoration: "none",
-            }}
-          >
-            Start Chat
-          </Link>
+        
+        <div className="profile-info">
+          <h1 className="profile-name">{character.name}</h1>
           
-          <Link
-            to={`/characters/${character.id}/edit`}
-            className="btn-secondary"
-            style={{
-              flex: 1,
-              textAlign: "center",
-              textDecoration: "none",
-            }}
-          >
-            Edit Character
-          </Link>
+          {character.personality && (
+            <div style={{ marginBottom: "1.5rem" }}>
+              <span className="character-tag">
+                {character.personality}
+              </span>
+            </div>
+          )}
+
+          {character.description && (
+            <div className="profile-section">
+              <div className="profile-section-label">Identity</div>
+              <p className="profile-section-text">{character.description}</p>
+            </div>
+          )}
+
+          {character.backstory && (
+            <div className="profile-section">
+              <div className="profile-section-label">Backstory</div>
+              <p className="profile-section-text">{character.backstory}</p>
+            </div>
+          )}
+
+          {character.greeting && (
+            <div className="profile-section">
+              <div className="profile-section-label">Greeting</div>
+              <p className="profile-section-text" style={{ fontStyle: "italic" }}>
+                "{character.greeting}"
+              </p>
+            </div>
+          )}
+          
+          <div className="profile-actions">
+            <Link
+              to={`/characters/${character.id}/chat`}
+              className="btn-primary"
+            >
+              <MessageSquare size={18} />
+              Start Chat
+            </Link>
+            
+            <Link
+              to={`/characters/${character.id}/edit`}
+              className="btn-secondary"
+            >
+              <Settings size={18} />
+              Edit Character
+            </Link>
+          </div>
         </div>
       </div>
     </div>

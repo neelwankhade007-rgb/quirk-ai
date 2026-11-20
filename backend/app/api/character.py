@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from app.db.mongodb import db
 from app.schemas.character import CharacterCreate, CharacterResponse
 from app.dependencies import get_current_user
+from app.services.default_characters import ensure_default_characters
 
 
 router = APIRouter(
@@ -75,6 +76,7 @@ def get_all_characters():
 def get_my_characters(
     current_user=Depends(get_current_user)
 ):
+    ensure_default_characters(current_user["id"])
     characters = list(
         db.characters.find({
             "created_by": current_user["id"]

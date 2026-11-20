@@ -10,10 +10,12 @@ import Navbar from "./components/Navbar";
 import CharacterProfile from "./pages/CharacterProfile";
 import Chat from "./pages/Chat";
 import Chats from "./pages/Chats";
+import AuthSessionManager from "./components/AuthSessionManager";
 
 function App() {
   return (
     <BrowserRouter>
+      <AuthSessionManager />
       <div className="app-container">
         <Navbar />
         <main className="main-content">

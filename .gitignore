@@ -60,4 +60,5 @@ web-build/
 .metro-health-check*
 
 # Miscellaneous
-CHECKLIST.md
+CHECKLIST.md
+PROJECT_OVERVIEW.md

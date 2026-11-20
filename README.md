@@ -78,7 +78,11 @@ Update your `.env` with your credentials:
 ```env
 MONGODB_URI="mongodb+srv://<username>:<password>@<cluster-url>"
 JWT_SECRET_KEY="your_jwt_secret_key_here"
+XKIRO_API_KEY="your_xkiro_api_key_here"
+GROQ_API_KEY="your_groq_api_key_here"
 ```
+
+JWT sessions expire after 24 hours. When a session expires, the app logs you out and prompts you to log in or register again. Each account receives three starter characters the first time its character list is loaded.
 
 #### Run Backend Server
 ```bash
