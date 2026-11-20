@@ -260,10 +260,7 @@ Do not mention that you are an AI unless the conversation specifically requires 
         )
 
     # Generate character response
-    ai_response = await generate_response(
-        llm_messages,
-        provider="xkiro"
-    )
+    ai_response = await generate_response(llm_messages)
 
     ai_message_data = {
         "conversation_id": conversation_id,

@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { loginUser } from "../services/api";
+import { LogIn } from "lucide-react";
+import { ACCESS_TOKEN_KEY } from "../utils/auth";
 
 function Login() {
   const [username, setUsername] = useState("");
@@ -8,6 +10,8 @@ function Login() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const sessionExpired = searchParams.get("session") === "expired";
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -20,7 +24,7 @@ function Login() {
         password,
       });
 
-      localStorage.setItem("access_token", data.access_token);
+      localStorage.setItem(ACCESS_TOKEN_KEY, data.access_token);
       navigate("/characters");
 
       setUsername("");
@@ -35,47 +39,56 @@ function Login() {
   };
 
   return (
-    <div className="auth-wrapper">
-      <div className="card auth-card">
+    <div className="auth-wrapper fade-in">
+      <div className="auth-card">
         <div className="card-header">
           <h1 className="card-title">Welcome back</h1>
           <p className="card-subtitle">Log in to manage your AI characters</p>
         </div>
 
-        {error && (
-          <div className="alert alert-error">
-            {error}
-          </div>
-        )}
+        <div className="card">
+          {sessionExpired && (
+            <div className="alert alert-error">
+              Your session has expired. Please log in or register to continue.
+            </div>
+          )}
 
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label className="form-label">Username</label>
-            <input
-              type="text"
-              placeholder="Enter your username"
-              value={username}
-              onChange={(event) => setUsername(event.target.value)}
-              required
-            />
-          </div>
+          {error && (
+            <div className="alert alert-error">
+              {error}
+            </div>
+          )}
 
-          <div className="form-group">
-            <label className="form-label">Password</label>
-            <input
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              required
-            />
-          </div>
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label className="form-label">Username</label>
+              <input
+                type="text"
+                placeholder="Enter your username"
+                value={username}
+                onChange={(event) => setUsername(event.target.value)}
+                required
+              />
+            </div>
 
-          <button type="submit" className="btn-primary" disabled={loading}>
-            {loading ? "Logging in..." : "Log In"}
-          </button>
-        </form>
+            <div className="form-group">
+              <label className="form-label">Password</label>
+              <input
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                required
+              />
+            </div>
 
+            <button type="submit" className="btn-primary" disabled={loading}>
+              <LogIn size={18} />
+              {loading ? "Logging in..." : "Log In"}
+            </button>
+          </form>
+        </div>
+        
         <div className="auth-footer">
           Don't have an account? <Link to="/register">Create one</Link>
         </div>

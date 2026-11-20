@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { fetchCharacters } from "../services/api";
 import type { Character } from "../types/character";
 import CharacterCard from "../components/CharacterCard";
+import { UserPlus, Ghost } from "lucide-react";
 
 function Characters() {
   const [characters, setCharacters] = useState<Character[]>([]);
@@ -39,24 +40,25 @@ function Characters() {
   }, []);
 
   return (
-    <div>
+    <div className="fade-in">
       <div className="page-header">
         <div>
           <h1 className="page-title">Characters</h1>
-          <p className="card-subtitle">Explore and chat with created AI personas</p>
+          <p className="page-subtitle">Explore and chat with created AI personas</p>
         </div>
         <Link
           to="/create-character"
           className="btn-primary"
-          style={{ textDecoration: "none", width: "auto", padding: "0.6rem 1.2rem", marginTop: 0 }}
         >
-          + Create Character
+          <UserPlus size={16} />
+          Create Character
         </Link>
       </div>
 
       {loading && (
-        <div style={{ textAlign: "center", padding: "3rem", color: "var(--text-muted)" }}>
-          Loading characters...
+        <div className="loading-state">
+          <div className="loading-spinner"></div>
+          <p className="loading-text">Loading characters...</p>
         </div>
       )}
 
@@ -68,11 +70,11 @@ function Characters() {
 
       {!loading && !error && characters.length === 0 && (
         <div className="empty-state">
+          <Ghost className="empty-state-icon" />
           <p>No characters created yet.</p>
           <Link
             to="/create-character"
             className="btn-primary"
-            style={{ textDecoration: "none", display: "inline-block", width: "auto", padding: "0.65rem 1.5rem" }}
           >
             Create Your First Character
           </Link>

@@ -9,6 +9,7 @@ import {
 import MessageContent from "../components/MessageContext";
 import CharacterAvatar from "../components/CharacterAvatar";
 import type { Character } from "../types/character";
+import { ArrowLeft, MoreVertical, Sparkles, Send } from "lucide-react";
 
 interface Message {
   id: string;
@@ -29,7 +30,6 @@ function Chat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // Load character and conversation history
   useEffect(() => {
     if (!characterId) return;
 
@@ -40,22 +40,15 @@ function Chat() {
       try {
         setLoading(true);
 
-        // Load character
         const characterData = await fetchCharacterById(id);
-
         if (!isMounted) return;
-
         setCharacter(characterData);
 
-        // Check whether conversation already exists
         const conversation = await getConversation(id);
-
         if (!isMounted) return;
 
         if (conversation) {
-          // Conversation exists → load saved messages
           const history = await getMessages(conversation.id);
-
           if (!isMounted) return;
 
           const formattedMessages: Message[] = history.map(
@@ -71,10 +64,8 @@ function Chat() {
               timestamp: message.created_at,
             }),
           );
-
           setMessages(formattedMessages);
         } else {
-          // No conversation yet → only show greeting locally
           if (characterData.greeting) {
             setMessages([
               {
@@ -89,14 +80,9 @@ function Chat() {
         }
       } catch (error) {
         console.error("Failed to load chat:", error);
-
-        if (isMounted) {
-          setMessages([]);
-        }
+        if (isMounted) setMessages([]);
       } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+        if (isMounted) setLoading(false);
       }
     }
 
@@ -107,27 +93,20 @@ function Chat() {
     };
   }, [characterId]);
 
-  // Scroll to latest message or typing indicator
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
       behavior: "smooth",
     });
   }, [messages, sending]);
 
-  // Add action formatting
   const handleActionFormat = () => {
     const input = inputRef.current;
-
     if (!(input instanceof HTMLTextAreaElement)) return;
 
     const start = input.selectionStart ?? inputValue.length;
     const end = input.selectionEnd ?? inputValue.length;
 
-    const newValue =
-      inputValue.slice(0, start) +
-      "****" +
-      inputValue.slice(end);
-
+    const newValue = inputValue.slice(0, start) + "****" + inputValue.slice(end);
     setInputValue(newValue);
 
     requestAnimationFrame(() => {
@@ -136,16 +115,19 @@ function Chat() {
     });
   };
 
+  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInputValue(e.target.value);
+    // Auto-grow logic
+    e.target.style.height = "auto";
+    e.target.style.height = `${Math.min(e.target.scrollHeight, 160)}px`;
+  };
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const trimmed = inputValue.trim();
+    if (!trimmed || sending || !characterId) return;
 
-    if (!trimmed || sending || !characterId) {
-      return;
-    }
-
-    // Immediately show user's message
     const userMsg: Message = {
       id: `user-${Date.now()}`,
       sender: "user",
@@ -154,10 +136,15 @@ function Chat() {
 
     setMessages((prev) => [...prev, userMsg]);
     setInputValue("");
+    
+    // Reset textarea height
+    if (inputRef.current) {
+      inputRef.current.style.height = "auto";
+    }
+    
     setSending(true);
 
     try {
-      // Backend creates the conversation if this is the first message
       const data = await sendMessage(characterId, trimmed);
 
       const characterMsg: Message = {
@@ -169,168 +156,158 @@ function Chat() {
       setMessages((prev) => [...prev, characterMsg]);
     } catch (error) {
       console.error("Failed to send message:", error);
-
-      // Remove optimistic message if sending failed
-      setMessages((prev) =>
-        prev.filter((message) => message.id !== userMsg.id),
-      );
-
+      setMessages((prev) => prev.filter((message) => message.id !== userMsg.id));
       setInputValue(trimmed);
-
       alert("Failed to send message");
     } finally {
       setSending(false);
     }
   };
 
-  const characterName = character?.name || "Aria";
+  const characterName = character?.name || "Loading...";
 
   if (loading) {
     return (
       <div className="chat-page">
-        <div
-          style={{
-            textAlign: "center",
-            padding: "3rem",
-            color: "var(--text-muted)",
-          }}
-        >
-          Loading chat...
+        <div className="loading-state" style={{ height: "100vh" }}>
+          <div className="loading-spinner"></div>
+          <p className="loading-text">Loading chat...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="chat-page">
-    <div className="chat-container">
-      {/* Top Header */}
-      <header className="chat-header">
-        <div className="chat-header-left">
-          <Link
-            to={character ? `/characters/${character.id}` : "/characters"}
-            className="chat-back-btn"
-            title="Back"
-          >
-            ← {characterName}
-          </Link>
-        </div>
-
-        <div className="chat-header-actions">
-          <button
-            type="button"
-            className="chat-menu-btn"
-            title="Options"
-            aria-label="More options"
-          >
-            ⋮
-          </button>
-        </div>
-      </header>
-
-      {/* Messages */}
-      <div className="chat-messages-area">
-        {/* Character Intro */}
-        <div className="chat-intro-card">
-          <div className="chat-intro-avatar" style={{ display: "flex", justifyContent: "center", marginBottom: "16px", backgroundColor: "transparent" }}>
-            <CharacterAvatar name={characterName} imageUrl={character?.image_url} size={80} />
-          </div>
-
-          <h2 className="chat-intro-name">{characterName}</h2>
-
-          {character?.personality && (
-            <span className="chat-intro-personality">
-              {character.personality}
-            </span>
-          )}
-
-          {character?.description && (
-            <p className="chat-intro-greeting">
-              "{character.description}"
-            </p>
-          )}
-        </div>
-
-        {/* Message List */}
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`chat-message-row ${msg.sender === "user" ? "user" : "character"
-              }`}
-          >
-            <div
-              className={`chat-bubble ${msg.sender === "user" ? "user" : "character"
-                }`}
+    <div className="chat-page fade-in">
+      <div className="chat-container">
+        {/* Top Header */}
+        <header className="chat-header">
+          <div className="chat-header-left">
+            <Link
+              to={character ? `/characters/${character.id}` : "/characters"}
+              className="chat-back-btn"
+              title="Back"
             >
-              <MessageContent text={msg.text} />
-            </div>
-          </div>
-        ))}
-
-        {/* Typing Indicator */}
-        {sending && (
-          <div className="chat-message-row character">
-            <div className="chat-bubble character chat-typing-indicator">
-              <div className="chat-typing-label">
-                {characterName} is typing...
+              <ArrowLeft size={18} style={{ marginRight: 8 }} />
+              <div className="chat-header-character">
+                <CharacterAvatar name={characterName} imageUrl={character?.image_url} size={28} />
+                <span className="chat-header-name">{characterName}</span>
               </div>
-
-              <div className="chat-typing-dots">
-                <span className="chat-typing-dot" />
-                <span className="chat-typing-dot" />
-                <span className="chat-typing-dot" />
-              </div>
-            </div>
+            </Link>
           </div>
-        )}
 
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Input */}
-      <form onSubmit={handleSendMessage} className="chat-input-bar">
-        <div className="chat-composer">
-          <textarea
-            ref={inputRef}
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-
-                if (!sending && inputValue.trim()) {
-                  e.currentTarget.form?.requestSubmit();
-                }
-              }
-            }}
-            placeholder="Type a message..."
-            autoFocus
-            disabled={sending}
-            rows={1}
-          />
-
-          <div className="chat-composer-actions">
+          <div className="chat-header-actions">
             <button
               type="button"
-              className="chat-format-btn"
-              onClick={handleActionFormat}
-              disabled={sending}
-              title="Add action formatting"
+              className="chat-menu-btn"
+              title="Options"
+              aria-label="More options"
             >
-              **
-            </button>
-
-            <button
-              type="submit"
-              className="chat-send-btn"
-              disabled={!inputValue.trim() || sending}
-            >
-              {sending ? "..." : "→"}
+              <MoreVertical size={20} />
             </button>
           </div>
+        </header>
+
+        {/* Messages */}
+        <div className="chat-messages-area">
+          {/* Character Intro */}
+          <div className="chat-intro-card">
+            <div className="chat-intro-avatar" style={{ marginBottom: "16px" }}>
+              <CharacterAvatar name={characterName} imageUrl={character?.image_url} size={80} />
+            </div>
+
+            <h2 className="chat-intro-name">{characterName}</h2>
+
+            {character?.personality && (
+              <div style={{ marginTop: "8px" }}>
+                <span className="character-tag">
+                  {character.personality}
+                </span>
+              </div>
+            )}
+
+            {character?.description && (
+              <p className="chat-intro-greeting">
+                {character.description}
+              </p>
+            )}
+          </div>
+
+          {/* Message List */}
+          {messages.map((msg) => (
+            <div
+              key={msg.id}
+              className={`chat-message-row ${msg.sender === "user" ? "user" : "character"}`}
+            >
+              <div className={`chat-bubble ${msg.sender === "user" ? "user" : "character"}`}>
+                <MessageContent text={msg.text} />
+              </div>
+            </div>
+          ))}
+
+          {/* Typing Indicator */}
+          {sending && (
+            <div className="chat-message-row character">
+              <div className="chat-bubble character chat-typing-indicator">
+                <div className="chat-typing-label">
+                  {characterName} is typing...
+                </div>
+
+                <div className="chat-typing-dots">
+                  <span className="chat-typing-dot" />
+                  <span className="chat-typing-dot" />
+                  <span className="chat-typing-dot" />
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div ref={messagesEndRef} />
         </div>
-      </form>
-    </div>
+
+        {/* Input */}
+        <form onSubmit={handleSendMessage} className="chat-input-bar">
+          <div className="chat-composer">
+            <textarea
+              ref={inputRef}
+              value={inputValue}
+              onChange={handleTextareaChange}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  if (!sending && inputValue.trim()) {
+                    e.currentTarget.form?.requestSubmit();
+                  }
+                }
+              }}
+              placeholder={`Message ${characterName}...`}
+              autoFocus
+              disabled={sending}
+              rows={1}
+            />
+
+            <div className="chat-composer-actions">
+              <button
+                type="button"
+                className="chat-format-btn"
+                onClick={handleActionFormat}
+                disabled={sending}
+                title="Add action formatting"
+              >
+                <Sparkles size={16} />
+              </button>
+
+              <button
+                type="submit"
+                className="chat-send-btn"
+                disabled={!inputValue.trim() || sending}
+              >
+                {sending ? "..." : <Send size={14} style={{ marginLeft: 2 }} />}
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

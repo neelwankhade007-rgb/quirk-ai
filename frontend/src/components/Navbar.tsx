@@ -1,12 +1,14 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Users, MessageSquare, PlusCircle, LogOut, LogIn, UserPlus } from "lucide-react";
+import { ACCESS_TOKEN_KEY } from "../utils/auth";
 
 function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const token = localStorage.getItem("access_token");
+  const token = localStorage.getItem(ACCESS_TOKEN_KEY);
 
   const handleLogout = () => {
-    localStorage.removeItem("access_token");
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
     navigate("/login");
   };
 
@@ -25,22 +27,26 @@ function Navbar() {
                 to="/characters"
                 className={`nav-link ${location.pathname === "/characters" ? "active" : ""}`}
               >
-                Characters
+                <Users size={16} />
+                <span className="nav-label">Characters</span>
               </Link>
               <Link
                 to="/chats"
                 className={`nav-link ${location.pathname === "/chats" ? "active" : ""}`}
               >
-                Chats
+                <MessageSquare size={16} />
+                <span className="nav-label">Chats</span>
               </Link>
               <Link
                 to="/create-character"
                 className={`nav-link ${location.pathname === "/create-character" ? "active" : ""}`}
               >
-                + New Character
+                <PlusCircle size={16} />
+                <span className="nav-label">Create</span>
               </Link>
-              <button onClick={handleLogout} className="btn-logout">
-                Logout
+              <div className="nav-separator"></div>
+              <button onClick={handleLogout} className="btn-logout" title="Logout">
+                <LogOut size={16} />
               </button>
             </>
           ) : (
@@ -49,13 +55,16 @@ function Navbar() {
                 to="/login"
                 className={`nav-link ${location.pathname === "/login" ? "active" : ""}`}
               >
-                Login
+                <LogIn size={16} />
+                <span className="nav-label">Login</span>
               </Link>
               <Link
                 to="/register"
-                className={`nav-link ${location.pathname === "/register" ? "active" : ""}`}
+                className="btn-primary"
+                style={{ padding: "8px 16px", marginLeft: "8px" }}
               >
-                Register
+                <UserPlus size={16} />
+                <span>Register</span>
               </Link>
             </>
           )}

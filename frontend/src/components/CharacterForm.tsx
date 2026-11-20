@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { createCharacter, updateCharacter } from "../services/api";
 import AvatarPicker from "./AvatarPicker";
 import type { Character } from "../types/character";
+import { Save, UserPlus } from "lucide-react";
 
 interface CharacterFormProps {
   initialData?: Character;
@@ -50,14 +51,6 @@ function CharacterForm({ initialData, onCharacterCreated }: CharacterFormProps) 
         onCharacterCreated();
       }
 
-      setName("");
-      setDescription("");
-      setPersonality("");
-      setGreeting("");
-      setBackstory("");
-      setImageUrl("");
-      setAvatarType(undefined);
-
       setTimeout(() => {
         navigate("/characters");
       }, 1000);
@@ -71,9 +64,9 @@ function CharacterForm({ initialData, onCharacterCreated }: CharacterFormProps) 
   };
 
   return (
-    <div style={{ maxWidth: "600px", margin: "0 auto" }}>
-      <div className="card">
-        <div className="card-header" style={{ textAlign: "left", marginBottom: "1.5rem" }}>
+    <div className="character-form-wrapper fade-in">
+      <div className="character-form-card">
+        <div className="card-header">
           <h1 className="card-title">{initialData ? "Edit AI Character" : "Create AI Character"}</h1>
           <p className="card-subtitle">Define the persona, style, and greeting of your character</p>
         </div>
@@ -154,6 +147,7 @@ function CharacterForm({ initialData, onCharacterCreated }: CharacterFormProps) 
           </div>
 
           <button type="submit" className="btn-primary" disabled={loading}>
+            {initialData ? <Save size={18} /> : <UserPlus size={18} />}
             {loading ? (initialData ? "Updating..." : "Creating...") : (initialData ? "Save Changes" : "Create Character")}
           </button>
         </form>

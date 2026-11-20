@@ -45,6 +45,7 @@ uploads/
 .DS_Store
 Thumbs.db
 .claude/
+.kilo/
 
 # Node / frontend / mobile
 node_modules/
@@ -60,4 +61,5 @@ web-build/
 .metro-health-check*
 
 # Miscellaneous
-CHECKLIST.md
+CHECKLIST.md
+PROJECT_OVERVIEW.md

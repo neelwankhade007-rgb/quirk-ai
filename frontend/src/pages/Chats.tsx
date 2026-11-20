@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { fetchConversations } from "../services/api";
 import type { ConversationSummary } from "../services/api";
 import CharacterAvatar from "../components/CharacterAvatar";
+import { MessageSquare, ArrowRight } from "lucide-react";
 
 function Chats() {
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
@@ -39,17 +40,18 @@ function Chats() {
   }, []);
 
   return (
-    <div>
+    <div className="fade-in">
       <div className="page-header">
         <div>
           <h1 className="page-title">Chats</h1>
-          <p className="card-subtitle">Continue a conversation with your characters</p>
+          <p className="page-subtitle">Continue a conversation with your characters</p>
         </div>
       </div>
 
       {loading && (
-        <div className="empty-state">
-          <p>Loading chats...</p>
+        <div className="loading-state">
+          <div className="loading-spinner"></div>
+          <p className="loading-text">Loading chats...</p>
         </div>
       )}
 
@@ -57,11 +59,11 @@ function Chats() {
 
       {!loading && !error && conversations.length === 0 && (
         <div className="empty-state">
+          <MessageSquare className="empty-state-icon" />
           <p>You have not started any chats yet.</p>
           <Link
             to="/characters"
             className="btn-primary"
-            style={{ textDecoration: "none", display: "inline-block", width: "auto", padding: "0.65rem 1.5rem" }}
           >
             Browse Characters
           </Link>
@@ -76,16 +78,16 @@ function Chats() {
               to={`/characters/${character.id}/chat`}
               className="chat-list-card"
             >
-              <div className="chat-list-avatar" style={{ backgroundColor: 'transparent' }}>
-                <CharacterAvatar name={character.name} imageUrl={character.image_url} size={48} />
+              <div className="chat-list-avatar">
+                <CharacterAvatar name={character.name} imageUrl={character.image_url} size={40} />
               </div>
-              <div>
+              <div className="chat-list-info">
                 <h2 className="character-name">{character.name}</h2>
                 {character.description && (
                   <p className="character-desc">{character.description}</p>
                 )}
               </div>
-              <span className="chat-list-arrow">→</span>
+              <ArrowRight className="chat-list-arrow" size={18} />
             </Link>
           ))}
         </div>

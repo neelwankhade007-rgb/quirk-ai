@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import { uploadImage } from "../services/api";
 import { DEFAULT_AVATARS } from "../utils/avatars";
 import CharacterAvatar from "./CharacterAvatar";
+import { Upload, Image as ImageIcon } from "lucide-react";
 
 interface AvatarPickerProps {
   name: string;
@@ -34,24 +35,24 @@ export default function AvatarPicker({ name, avatarType, imageUrl, onChange }: A
   };
 
   return (
-    <div className="avatar-picker" style={{ marginBottom: "1.5rem" }}>
-      <label className="form-label">Character Image</label>
+    <div className="avatar-picker">
+      <label className="form-label" style={{ marginBottom: "8px", display: "block" }}>Character Image</label>
       
-      {error && <div className="alert alert-error" style={{ marginBottom: "0.5rem", padding: "0.5rem" }}>{error}</div>}
+      {error && <div className="alert alert-error">{error}</div>}
 
       {mode === "preview" ? (
-        <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+        <div className="avatar-picker-preview">
           <CharacterAvatar name={name || "?"} imageUrl={imageUrl} size={80} />
           
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-            <div style={{ display: "flex", gap: "0.5rem" }}>
+          <div className="avatar-picker-actions">
+            <div className="btn-row">
               <button 
                 type="button" 
                 className="btn-primary" 
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
-                style={{ padding: "0.4rem 0.8rem", fontSize: "0.9rem" }}
               >
+                <Upload size={16} />
                 {uploading ? "Uploading..." : "Upload Image"}
               </button>
               
@@ -60,11 +61,12 @@ export default function AvatarPicker({ name, avatarType, imageUrl, onChange }: A
                 className="btn-secondary" 
                 onClick={() => setMode("select_default")}
                 disabled={uploading}
-                style={{ padding: "0.4rem 0.8rem", fontSize: "0.9rem" }}
               >
+                <ImageIcon size={16} />
                 Choose Default
               </button>
             </div>
+            <p className="form-hint">Upload a custom image or choose from our gallery</p>
             
             <input 
               type="file" 
@@ -76,30 +78,31 @@ export default function AvatarPicker({ name, avatarType, imageUrl, onChange }: A
           </div>
         </div>
       ) : (
-        <div className="default-avatar-grid">
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-            <span style={{ fontSize: "0.9rem" }}>Select a default avatar:</span>
-            <button type="button" onClick={() => setMode("preview")} style={{ background: "none", border: "none", color: "var(--primary-color)", cursor: "pointer" }}>Cancel</button>
+        <div className="default-avatar-grid fade-in">
+          <div className="default-avatar-grid-header">
+            <span>Select a default avatar:</span>
+            <button 
+              type="button" 
+              className="btn-ghost"
+              style={{ padding: "4px 8px" }}
+              onClick={() => setMode("preview")}
+            >
+              Cancel
+            </button>
           </div>
           
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+          <div className="default-avatar-options">
             {DEFAULT_AVATARS.map((avatar) => (
               <button
                 key={avatar.id}
                 type="button"
+                className={`default-avatar-btn ${avatarType === "default" && imageUrl === avatar.url ? "selected" : ""}`}
                 onClick={() => {
                   onChange("default", avatar.url);
                   setMode("preview");
                 }}
-                style={{
-                  background: "none",
-                  border: avatarType === "default" && imageUrl === avatar.url ? "2px solid var(--primary-color)" : "2px solid transparent",
-                  borderRadius: "50%",
-                  padding: "2px",
-                  cursor: "pointer"
-                }}
               >
-                <img src={avatar.url} alt={avatar.name} style={{ width: "60px", height: "60px", borderRadius: "50%", backgroundColor: "#222" }} />
+                <CharacterAvatar name={avatar.name} imageUrl={avatar.url} size={52} />
               </button>
             ))}
           </div>
